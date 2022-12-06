@@ -1,0 +1,255 @@
+<html>
+
+<head>
+</head>
+
+<style>    
+
+canvas {
+position: absolute;
+top:0;
+left:0;
+}
+
+</style>
+
+<body>
+  
+    <canvas></canvas>
+    <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script>
+
+var canvas = document.querySelector("canvas");
+var width = window.innerWidth;
+var height = window.innerHeight;
+var context = canvas.getContext("2d");
+
+canvas.setAttribute("width", width);
+canvas.setAttribute("height", height);
+canvas.addEventListener('mousemove',getMouse,false);
+      
+var mouseX=0;
+var mouseY=0;
+
+var fov = 500;
+
+var point = [];
+var point3d = [];
+var angleX = 0;
+var angleY = 0;
+var HALF_WIDTH = width / 2;
+var HALF_HEIGHT = height / 2;
+
+var x3d = 0;
+var y3d = 0;
+var z3d = 0;
+
+var firstx2d=0;
+var firsty2d=0;
+var firstScale=0;
+var lastScale = 0;
+var lastx2d = 0;
+var lasty2d = 0;
+
+var x, y = 0;
+var lastX, lastY = 0;
+var firstX, firstY = 0;
+
+var dim = 100; // This is the number of rings, each ring has as many points as there are rings
+      
+     //**************** CHANGE THIS FOR FUN*******************//
+
+var spacing = ((Math.PI * 2) / dim * 0.4);
+//var spacing = 0.1;  //I don't really understand why this happens, but it is cool
+//var spacing = 0.4;
+      
+//*****************************************************************************//
+
+var numPoints = dim * dim; // This is the total number of points
+      
+
+      //**************** CHANGE THIS FOR FUN*******************//
+      
+      
+var size = 17; //*****Good visualisation at size = 10 or size = 5****//
+
+var counter=0;
+
+function draw() {
+
+// We're doing the geometery in the draw loop because we want to interact with it.
+
+var points = [];
+    // Now we build the geom
+    
+    // This is a sphere just like before
+for (var i = 0; i < dim; i++) {
+
+    var z = size * Math.cos(spacing * i) * (dim/8) //* mouseX/0.001; //The z co-ordinate
+    var s = size * Math.cos(spacing * i) //* mouseY/0.001; // Calculate the size of the current ring
+    for (var j = 0; j < dim; j++ ) { // For each ring   
+		var point = [size * Math.cos(spacing * j) * s, size * Math.sin(spacing * j)*s,z]; // Create a circle at the current size, at the current depth 
+        points.push(point); // Add the points   
+    }
+}
+  
+//------------------------------------ DRAWING IT OUT ------------------------------------------//
+
+    //context.fillStyle = "rgb(35,35,35)";
+    context.fillStyle = "rgb(30,36,40)";
+    context.fillRect(0, 0, width, height);
+    
+    angleX+=(mouseX/width)/4;
+    angleY+=(mouseY/height)/4;
+    //angleX+=0.1;
+    //angleY+=0.1;
+
+// Here we run through each ring and work out where it should be drawn
+
+    for (let i = 0; i < numPoints /2; i+=dim) {
+
+        for (let j = 0; j <dim; j++ ) {
+        point3d = points[Math.floor(i+j)];
+        z3d = point3d[2];
+
+// This is the speed of the z
+// It moves the points forwards in space
+// We don't need it for the pure rotate
+        // z3d -= 1.0;
+
+// Check that the points aren't disappearing into space and if so push them back
+// This also stops them stretching
+// When they get too close
+        if (z3d < -fov) z3d += 0;
+        
+        point3d[2] = z3d;
+ 
+ // Calculate the rotation
+ 
+    rotateX(point3d,angleX * 0.5);
+    rotateY(point3d,angleY);
+ 
+ // Get the point in position 
+ 
+        x3d = point3d[0];
+        y3d = point3d[1];
+        z3d = point3d[2];
+// Convert the Z value to a scale factor
+// This will give the appearance of depth
+        var scale = (fov / (fov + z3d));
+
+// Store the X value with the scaling
+// FOV is taken into account
+// (just pushing it over to the left a bit too)
+        var x2d = (x3d * scale) + HALF_WIDTH / 1.5;
+
+// Store the Y value with the scaling
+// FOV is taken into account
+
+        var y2d = (y3d * scale) + HALF_HEIGHT;
+
+//-------------------------- STORING INITIAL VALUES ---------------------------//   
+
+        if (j==0){         //If j=0, it means it is at the beginning
+            
+            firstx2d=x2d;
+            firsty2d=y2d;
+            firstScale=scale;           
+           
+            lastx2d=x2d;
+            lasty2d=y2d;
+            lastScale=scale;           
+    
+        }
+ 
+
+//-------------------- CREATING GRADIENT FOR STROKE STYLE ----------------------//
+          
+       var gradient = context.createLinearGradient(0, height, 0, 0);
+  		gradient.addColorStop(0.90, '#E84A5F');
+  		gradient.addColorStop(0.75, '#FF847C');
+  		gradient.addColorStop(0.65, '#99B898');
+  		gradient.addColorStop(0.35, '#E84A5F');
+  		gradient.addColorStop(0.25, '#E84A5F');
+        
+        context.lineWidth = Math.random(); //Randomises width of line while drawing to make it appear more compelling
+          
+        context.strokeStyle = gradient;
+        context.beginPath();
+        context.moveTo(lastx2d + lastScale, lasty2d);
+        context.lineTo(x2d + scale, y2d);
+        context.stroke();
+          
+
+//------------ STORE POINTS SO THEY CAN BE JOINED AT THE END ------------//
+
+        lastx2d=x2d;
+        lasty2d=y2d;
+        lastScale=scale;
+
+//-------------- END OF THE RING - JOIN TO FIRST POINT ------------------//
+        
+        if (j==dim-1) {
+            
+        context.lineWidth = scale;
+        context.beginPath();
+        context.moveTo(lastx2d + lastScale, lasty2d);
+        context.lineTo(firstx2d + firstScale, firsty2d);
+        context.stroke();           
+            
+         
+            
+        }
+
+     }
+    }
+}
+
+setInterval(draw, 50);
+
+function rotateX(point3d,angleX) {
+        var	x = point3d[0]; 
+        var	z = point3d[2]; 
+	
+        var	cosRY = Math.cos(angleX);
+        var	sinRY = Math.sin(angleX);
+        
+        var	tempz = z; 
+        var	tempx = x;
+
+        x= (tempx*cosRY)+(tempz*sinRY);
+        z= (tempx*-sinRY)+(tempz*cosRY);
+
+        point3d[0] = x;
+        point3d[2] = z;
+          
+}
+
+function rotateY(point3d,angleY) {
+        var y = point3d[1];
+        var	z = point3d[2]; 
+	
+        var cosRX = Math.cos(angleY);
+        var sinRX = Math.sin(angleY);
+        
+        var	tempz = z; 
+        var	tempy = y;
+
+        y= (tempy*cosRX)+(tempz*sinRX);
+        z= (tempy*-sinRX)+(tempz*cosRX);
+
+        point3d[1] = y;
+        point3d[2] = z;
+          
+} 
+
+function getMouse (mousePosition) {
+//for other browsers..
+    mouseX = mousePosition.layerX;
+    mouseY = mousePosition.layerY;
+}
+      
+</script>
+
+</body>
+
+</html>

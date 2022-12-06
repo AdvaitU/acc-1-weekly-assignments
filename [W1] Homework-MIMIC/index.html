@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script src = "https://mimicproject.com/libs/nexusUI.js">
+</script>
+ <script src = "https://mimicproject.com/libs/maximilian.v.0.1.js">
+</script>
+<link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet"/>  
+ <link rel="stylesheet" href="https://mimicproject.com/libs/maximilian-example.css" /> 
+   <div>
+    <div id="title">Maximilian.js Seed</div>
+    <div id="subtitle">This is a starting point for your own projects</div>
+  <div><button id="playButton">Play</button></div>
+</div>
+<div id="oscilloscope"></div>
+<div id="spectrogram"></div>
+</head>
+<body>
+  
+  <!-- Maximilian code goes here -->
+  <script id = "myAudioScript">
+    var osc1 = new Maximilian.maxiOsc();   //creating oscillators
+    var osc2 = new Maximilian.maxiOsc();
+    var osc3 = new Maximilian.maxiOsc();
+    var osc4 = new Maximilian.maxiOsc();
+    var osc5 = new Maximilian.maxiOsc();
+    var osc6 = new Maximilian.maxiOsc();
+    var osc7 = new Maximilian.maxiOsc();
+    
+    function play() {
+      
+      //I0 - Initial experiments - Best heard with headphones as the sound 'fills in' - Simple addition of two sinewaves multiplied by a coswave and adjusted for amplitude
+      //return osc1.sinewave(20 + osc2.sinewave(1/60) * 20) * osc3.coswave(0.1) * 4;
+      
+      //I1 - Using 4 oscillators to create base sound through addition and multiplication of phases. Base is then modulated by a multiplication of a sinewave and saw wave to create a helicopter-like buzzing which is at the forefront at the beginning but fades slowly as the background wavelenghts become stronger
+      //return (osc1.sinewave(20 + osc2.sinewave(60)) + osc3.sinewave(40 + osc4.sinewave(60))) * osc5.sinewave(osc4.saw(0.1)) * 5
+      
+      //I1.5 - Written by ZhouZhou - z.zhou0520221@arts.ac.uk - Function copied and edited slightly in frequencies
+      //return (osc1.sinewave(osc2.coswave(0.01) * 222 ) * osc3.square(osc4.coswave(0.2) * 0.0005) * 0.5 ) * 2  
+      
+      //I2 - Added cosine wave and saw wave as multipliers to base wave to create more variation over time 
+      //return (osc1.sinewave(31) + osc2.sinewave(osc3.sinewave(122))) * 40 *osc3.coswave(2) * osc4.saw(0.2)
+      
+     //noise();
+      
+    //I3 - Further exploration in the same with differently modulated cosine and saw waves - Sound 'descends' for a minute, then 'ascends' - Different breaks every 4 counts. Try changing osc6 frequency to 1 - 1.5 to flow through result quicker.
+    return ((osc1.sinewave(osc2.coswave(0.5) * 200 ) * osc3.square(osc4.coswave(0.2) * 0.005) * 0.5 )) * 40 * osc5.coswave(1.3) * osc6.saw(0.2) 
+      
+     // I4 - Experimenting with the same soundwave but but with phasorBetween function to ensure modulation in the range 0.2-0.6
+     //return ((osc1.sinewave(osc2.coswave(1) * 200 ) * osc3.square(osc4.coswave(0.2) * 0.05) * 0.5 )) * 40 * osc5.coswave(5) * osc6.phasorBetween(0.35, 0.2, 0.6) 
+     
+    }
+ 
+</script>
+  
+ <!-- Main Javascript code goes here --> 
+  <script language="javascript">
+    let maxi;
+    initAudioEngine().then((dspEngine)=>{ 
+      maxi = dspEngine;
+      setup();
+      //Get audio code from script element
+      maxi.setAudioCode("myAudioScript");
+    })
+    
+    ///////YOU CAN IGNORE ME - CODE FOR SCOPES///////
+    let setup = ()=> {
+      maxi.hush()
+      Nexus.context = maxi.audioWorkletNode.context;
+      new Nexus.Oscilloscope('oscilloscope', {'size': [400,100]}).connect(maxi.audioWorkletNode);
+      new Nexus.Spectrogram('spectrogram', {'size': [400,100]}).connect(maxi.audioWorkletNode);
+      const playButton = document.getElementById('playButton');   
+      let playAudio = () => {
+        playButton.innerHTML  = maxi.play() ? "STOP":"PLAY"
+      }
+      playButton.addEventListener("click", () => playAudio());
+    }
+    ///////////////////////////////////////////////
+ 
+</script>
+</body>
+</html>

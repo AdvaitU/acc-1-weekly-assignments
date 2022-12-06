@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+  
+<body style="background-color:#D2D3CE;">
+    
+    <canvas></canvas> <!-- Making Canvas - HTML -->
+  	<h2> Flores Geometrici Randomiser [Week 3] </h2>
+  	<p>Press Submit after you move the sliders around to effect change. I don't know enought HTML to do it without the button xD</p>
+
+
+
+<form action="/action_page.php">
+
+  <div class="slidecontainer">
+  <label for="digit1">Density Alpha Channel (d1)  :</label>
+  <input type="range" min="1" max="80" value="10" class="slider" id="digit1">
+</div>
+  
+  <div class="slidecontainer">
+  <label for="digit3">Density Beta Channel (1/d2)   :</label>
+  <input type="range" min="1" max="99" value="50" class="slider" id="digit3">
+</div>
+  
+  <div class="slidecontainer">
+  <label for="digit2">Resolution (Segmentation)          :</label>
+  <input type="range" min="1" max="100" value="90" class="slider" id="digit2">
+</div>
+  
+  <div class="slidecontainer">
+  <label for="digit4">Base Line Type (line/arc/quad)      :</label>
+  <input type="range" min="1" max="4" value="1" class="slider" id="digit4">
+</div>
+  
+    <div class="slidecontainer">
+  <label for="digit6">Trigonometry Change      :</label>
+  <input type="range" min="1" max="5" value="1" class="slider" id="digit6">
+</div>
+  
+<label for="myCheck">Transparent Fill          :</label> 
+<input type="checkbox" id="myCheck" onclick="opFilter()">
+  
+  <p> </p>
+  
+ <button type="button" onclick="valueInput()"> Submit </button>
+</form>
+
+  
+<!-------------------------JAVASCRIPT CODE --------------------------------->
+
+    <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  } 
+</script><script type="text/javascript">
+        
+//-------------------- SETTING VARIABLES FOR MOUSE -----------------------//
+      
+        var mouseX =50;
+        var mouseY =10;
+        const TWO_PI = Math.PI * 2; //Value of 2xPi saved as variable.
+      
+      	var dig1 = 10;  // Setting up variables to store inputs
+        var dig2 = 450;  //Variables set to 50 i.e. the middle point of the range
+        var dig3 = 100;
+        var dig4 = 1;
+      	var dig5 = 0;
+      	var dig6 = 1;
+
+//--------------- SETTING UP CANVAS IN JAVASCRIPT ------------------------//
+
+        var canvas = document.querySelector("canvas"); //Instead of getElementById()
+
+        canvas.width = window.innerWidth;   //Set canvas width to window inner width
+        canvas.height = 400; //Sets height to 400 constant
+    
+        var context = canvas.getContext("2d");  //Setting the 'context'
+
+        canvas.addEventListener('mousemove', getMouse, false); //Tells browser to get information from getMouse() function
+
+//------------------ getMouse() FUNCTION DECLARED ---------------------------//
+      
+        function getMouse(mousePosition) {
+                mouseX = mousePosition.layerX;  //Get mouse X-Axis value and save
+                mouseY = mousePosition.layerY;  //Same for Y-Axis
+        }
+ //--------------------- GETTING DIGITS FROM HTML ---------------------------//
+      
+      function valueInput() {
+      
+      var x1 = document.getElementById("digit1");
+      dig1 = x1.value;
+      var x2 = document.getElementById("digit2");
+      dig2 = x2.value;
+      var x3 = document.getElementById("digit3");
+      dig3 = x3.value;
+      var x4 = document.getElementById("digit4");
+      dig4 = x4.value;
+      var x6 = document.getElementById("digit6");
+      dig6 = x6.value;
+
+
+      console.log(dig1);
+parent.postMessage(["console",JSON.stringify(dig1)], "*");
+      console.log(dig2);
+parent.postMessage(["console",JSON.stringify(dig2)], "*");
+      console.log(dig3);
+parent.postMessage(["console",JSON.stringify(dig3)], "*");
+      console.log(dig4);
+parent.postMessage(["console",JSON.stringify(dig4)], "*");   
+        
+      } 
+      
+//---------------------- CHECKBOX FUNCTION --------------------------------//
+      
+      function opFilter() {
+        var checkBox = document.getElementById("myCheck");
+        if (checkBox.checked == true){
+          	dig5 = 1;
+        } else {
+            dig5 = 0;
+        }
+        console.log(dig5);
+parent.postMessage(["console",JSON.stringify(dig5)], "*");  
+      }
+
+//---------------------- MAIN DRAW FUNCTION --------------------------------//
+      
+      	function draw() {
+            
+	   	var segments = dig2 * 5;
+		var spacing = TWO_PI / segments * dig1 * 0.1;
+		var radius = 200;
+ 
+		context.clearRect(0,0, canvas.width, canvas.height); //Clear screen before requesting next
+          
+ //---------------------- DRAWING CIRCLES ------------------------------//
+          
+		context.beginPath();
+
+		for (var i = 0; i < segments; i++) {
+
+		context.strokeStyle = "#364" + "54F"; //Sets stroke style 36454F
+        context.fillStyle = "#517470"; //Sets fill style
+ 
+		var x = 0;
+        var y = 0; 
+        
+          
+          
+         if (dig6 == 1) {
+            x = Math.sin(spacing * i * (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+        y = Math.sin(spacing * i* (mouseX/dig3)) * Math.sin(spacing * i * (mouseY/dig3)) * radius;
+            }
+          else if (dig6 == 2) {
+          x = Math.cos(spacing * i * (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+        y = Math.sin(spacing * i* (mouseX/dig3)) * Math.sin(spacing * i * (mouseY/dig3)) * radius;
+          }
+          else if (dig6 == 3) {
+          x = Math.atan(spacing * i * (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+        y = Math.tan(spacing * i* (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+          }
+          else if (dig6 == 4) {
+          x = Math.tan(spacing * i * (mouseX/dig3)) * Math.sin(spacing * i * (mouseY/dig3)) * radius;
+        y = Math.sin(spacing * i* (mouseX/dig3)) * Math.sin(spacing * i * (mouseY/dig3)) * radius;
+          }
+          else {
+            y = Math.atan(spacing * i * (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+        x = Math.tan(spacing * i* (mouseX/dig3)) * Math.cos(spacing * i * (mouseY/dig3)) * radius;
+          }
+            
+            
+          
+          
+          
+          if (dig4 == 1) {
+            context.lineTo(x+radius,y+radius); }
+          else if (dig4 == 2) {
+             context.quadraticCurveTo(x,y,x+radius,y+radius) }
+          else if (dig4 == 3) {
+            context.bezierCurveTo(200, 200, x+1, y+1, x+radius, y+radius); }
+          else { context.arcTo(x+150, y+150, x+151, y+151, 1); }
+            
+          
+            }
+
+            context.stroke(); //draw the outline
+          
+          	if (dig5 == 1) {
+          		context.globalAlpha = 0.4;
+           		context.fill();
+            }
+          	else { context.globalAlpha = 1;}
+          
+            context.closePath();
+			requestAnimationFrame(draw);
+        }
+
+//---------- END OF DRAW FUNCTIONS + REQUESTING ANIMATION FRAMES ---------//
+      
+        requestAnimationFrame(draw);
+
+//------------------------------ END OF CODE ------------------------------//
+
+   
+</script>
+
+</body>
+
+</html>

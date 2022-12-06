@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script src = "https://mimicproject.com/libs/maximilian.js">
+</script>
+
+</head>
+<body>
+<script language="javascript" type="text/javascript">
+  
+  let maxi = maximilian();  //Import maximilian
+  let audio = new maxi.maxiAudio(); //Set context
+  let myOsc = new maxi.maxiOsc(); //Create oscillator
+  
+  //----------Making maxiClock -------------//
+  
+  let myClock = new maxi.maxiClock();
+  
+  //---------- Making objects for sample ----------//
+  
+  let drawer = new maxi.maxiSample();
+  let cBell = new maxi.maxiSample();
+  let fPowder = new maxi.maxiSample();
+  let sGun = new maxi.maxiSample();
+  let pistol = new maxi.maxiSample();
+  let helloBB = new maxi.maxiSample();
+  let bgM = new maxi.maxiSample();
+  
+  //------Inititalising audio engine ------//
+  
+  audio.init();
+  
+  //----------- Loading Samples --------------//
+  
+  audio.loadSample('drawer_shut.wav', drawer);
+  audio.loadSample('cycle_bell.wav', cBell);
+  audio.loadSample('clap.wav', fPowder);
+  audio.loadSample('scifi_gun.wav', sGun);
+  audio.loadSample('pistol_cocking.wav', pistol);
+  audio.loadSample('hello_baby.wav', helloBB);
+  audio.loadSample('bg_scary.wav', bgM);
+  
+  //------------Initialising Clock ------------//
+  
+  myClock.setTempo(120);
+  myClock.setTicksPerBeat(8);
+  
+  //--------------- Audio Function -------------//
+  
+  audio.play = function() {
+   
+    myClock.ticker();
+    //var counter;
+    //if (myClock.beat) counter++
+    
+    
+    if (myClock.tick && myClock.playHead%4 == Math.random()*10) {  pistol.trigger();}
+    if (myClock.tick && myClock.playHead%4 == 0) {  pistol.trigger();}
+    if (myClock.tick && myClock.playHead%(Math.random() * 10) == 1) {sGun.trigger();}
+    if (myClock.beat && myClock.playHead%3 == 0) {cBell.trigger(); }
+    if (myClock.beat && myClock.playHead%5 == 0) {fPowder.trigger(); }
+    if (myClock.beat && myClock.playHead%3 == 0) {
+      if ((Math.random() * 100) >= 70) {
+      sGun.trigger(); }
+    }
+    
+  
+   var out = pistol.playOnce() + sGun.playOnce() + cBell.play() + helloBB.play(0.03) + helloBB.play(0.05) + (fPowder.playOnce(myOsc.sinewave(3)) * 0.2) + (sGun.playOnce(0.6) * 0.6)
+    
+   return out; 
+    
+  }
+
+  
+  //---------- End of Audio Function ---------//
+</script>
+</body>
+</html>

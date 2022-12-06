@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<head>
+<script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script crossorigin src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js">
+</script>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			margin: 0px;
+			background-color: #000000;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<script id="vertexShader" type="x-shader/x-vertex">
+		uniform highp float time;
+        
+        mat4 scale = mat4(1.0,0.0,0.0,0.0,0.0,0.25,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+        
+		void main() {
+        
+            float displacementHeight = 3.0;
+            float displacementY = sin(time + (position.x) * 5.) * displacementHeight;
+	
+            vec4 modifiedPosition = vec4(position,1.0);
+	        modifiedPosition.y += displacementY;
+	        //gl_Position = modifiedPosition * scale ;                
+            
+	        gl_Position = vec4(position,1.0) ;                
+		}
+
+</script>
+	<script id="fragmentShader" type="x-shader/x-fragment">
+		//============================================================
+		//PUT YOUR GLSL CODE HERE
+		//============================================================
+
+        precision mediump float; // Setting precision as mediump -----------------------------------------------
+        
+        // Declaring common uniforms at the starting of the code -----------------------------------------------
+          
+          uniform vec2 resolution;
+          uniform vec2 mouse;
+          uniform highp float time; 
+          #define M_PI 3.14159265358979323846  // Defining the value of Pi to be used later in the code ----------
+
+    	// Square Function -------------------------------------------------------------------------------------
+        	
+            float square(vec2 pos, float size) {
+        	vec2 normCoords = gl_FragCoord.xy/resolution;
+            float aspect = resolution.x/resolution.y;
+            size*=0.3;
+            float size1 = abs(sin(time)) / 3.;
+            if (length((normCoords.x-pos.x) * aspect)< size1 && length(normCoords.y-pos.y) < size1) {
+                return 3.0;} 
+                else { return 1.; } }
+
+        
+        // Line Function ---------------------------------------------------------------------------------------
+            
+            float line(vec2 pos, float funct) {
+               return step(funct,pos.y)-step(funct,pos.y-0.01);
+            }
+        
+        
+        // Circle Function -------------------------------------------------------------------------------------
+        	
+            float circle(vec2 pos, float size) {
+            size = 1./size;
+            size*=10.;
+            float aspect = resolution.x/resolution.y;
+            vec2 normCoord = vec2(gl_FragCoord.x/(resolution.x) * aspect,gl_FragCoord.y/resolution.y);
+            float colour = distance(normCoord,pos);
+            return smoothstep(colour * size, colour * size+0.12,1.);
+        }  
+        
+        	
+        
+        
+        // MAIN () ----------------------------------------------------------------------------------------------
+        void main(){
+            
+            vec2 norm_res = vec2(gl_FragCoord.xy / resolution);  // Getting the Normal res
+			
+            // Array Rotation --------------------------------------------------------------------------------
+            float angle = sin(time + mouse.x)/sin(time + mouse.y); 
+            mat2 rotation = mat2(cos(angle),sin(angle),-sin(angle),cos(angle)); // Transformation matrix for the rotation.
+            mat2 scale = mat2(2.,0.,0.,2.); // Matrice to record the scale
+            vec2 translate = vec2(resolution.x/2.,resolution.y/2.); 
+            vec2 pos = mod(rotation * (gl_FragCoord.xy - translate), vec2(55.0)) - vec2(28.0); 
+			float dist_squared = dot(pos/2., pos/2.);
+            
+            
+            // Drawing Shapes --------------------------------------------------------------------------------
+            float rect = square(vec2(1,0.5),10.);  // Squares using the square function
+            float rect2 = square(vec2(0.5,1.),10.);
+            float rect3 = square(vec2(0.,0.5),10.);
+            float rect4 = square(vec2(0.5,0.),10.);
+            float rect5 = square(vec2(0.5,0.5),10.);
+         
+            float  circle1 = circle(vec2(0.,0.),5.);  // Circles using the circle function
+            float  circle2 = circle(vec2(0.25,0.2),5.);
+            float  circle3 = circle(vec2(0.5,0.4),5.);
+            float  circle4 = circle(vec2(0.75,0.6),5.);
+            float  circle5 = circle(vec2(1.8,0.8),5.);
+            
+            vec3 squareOne = vec3(sin(0.3 + time),0.1,0.5) * rect;    // Colouring the Squares
+            vec3 squareTwo = vec3(0.3,sin(0.1 + time),0.15) * rect2;
+            vec3 squareThree = vec3(fract(0.3),0.1,0.) * rect3;
+            vec3 squareFour = vec3(fract(0.3),0.1,0.) * rect4;
+            vec3 squareFive = vec3(fract(0.3),0.1,0.) * rect5;
+            
+            vec3 circleOne = vec3(0.8,0.3,0.2) * circle1; // Colouring the circles
+            vec3 circleTwo = vec3(fract(0.3),0.1,0.) * circle2;
+            vec3 circleThree = vec3(sin(0.3 - time),cos(0.4 - time),0.) * circle3;
+            vec3 circleFour = vec3(exp(0.3),0.1,6.) * circle4;
+            vec3 circleFive = vec3(fract(0.6),6.1,0.) * circle5;
+            
+            vec2 lPos = gl_FragCoord.xy/resolution;   // Drawing Lines
+            float y = 0.5+ (tan(lPos.x*6.28) * 0.5);
+            vec3 lColor = vec3(y);
+            float lines = line(lPos,y);
+            lColor = vec3(lines,0.,0.);               // Colouring Lines
+
+            
+           // gl_FragColour Statement -------------------------------------------------------------------------
+
+           gl_FragColor = vec4(squareOne - squareTwo + squareThree - squareFour + squareFive - circleOne + circleTwo + circleThree - circleFour + circleFive - lColor + vec3(smoothstep(30., 300., dist_squared)) ,1.0);
+        }
+        
+		//============================================================
+		//END OF GLSL CODE
+		//============================================================
+         
+</script>
+          <script>
+            
+            
+              // GLOBAL VARIABLES ----------------------------------------------------------------------
+              var pixel_resolution = 2;
+              var stats;
+              var camera, scene, renderer;
+              var uniforms;
+              init();
+              animate();
+              function init() {
+
+          
+          	// THREE JS OBJECTS ------------------------------------------------------------------------
+			camera = new THREE.Camera();
+			camera.position.z = 1;
+			scene = new THREE.Scene();
+          
+          	// PLANE BUFFER OBJECT ---------------------------------------------------------------------
+			var geometry = new THREE.PlaneBufferGeometry(2,2);
+			uniforms = { time: { type: 'f', value: 1.0 }, resolution: { type: 'v2', value: new THREE.Vector2() }, mouse: {type: "v2", value: new THREE.Vector2()}};
+			var material = new THREE.ShaderMaterial({ uniforms: uniforms, vertexShader: document.getElementById('vertexShader').textContent, fragmentShader: document.getElementById('fragmentShader').textContent });
+			var mesh = new THREE.Mesh(geometry, material);
+			scene.add(mesh);
+          
+          	// RENDER OBJECT ---------------------------------------------------------------------
+			renderer = new THREE.WebGLRenderer();
+			renderer.setPixelRatio(window.devicePixelRatio / pixel_resolution);
+			document.body.appendChild(renderer.domElement);
+			onWindowResize();
+			window.addEventListener('resize', onWindowResize, false);
+	        window.addEventListener('mousemove', onMouseMove, false);
+
+ // FUNCTIONS ---------------------------------------------------------------------
+		}
+		function onWindowResize(event) {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			uniforms.resolution.value.x = renderer.domElement.width;
+			uniforms.resolution.value.y = renderer.domElement.height;
+
+		}
+		function animate() {
+			requestAnimationFrame(animate);
+			render();
+		}
+		function onMouseMove( event ) {
+        	uniforms.mouse.value.x = ( event.clientX / window.innerWidth );
+ 	        uniforms.mouse.value.y = ( 1-(event.clientY) / window.innerHeight
+ 	        );
+        }
+		function render() {
+			uniforms.time.value += 0.01;
+			renderer.render(scene, camera);
+		}
+
+</script>
+</body>
+</html>
